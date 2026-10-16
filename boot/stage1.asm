@@ -26,7 +26,7 @@ mov al, [si]      ; read one byte from memory at DS:SI into AL
 
 .print:
   mov ah, 0x0E    ; select BIOS TTY print function
-  int 0x10        ; call BIOS video service to print contents of AL
+  int 0x10        ; call BIOS video service to print contents of AL; int = interrupt
   ret             ; pop saved return address from stack and resume there
 
 .done:
