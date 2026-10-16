@@ -1,5 +1,5 @@
 bits 16           ; tell NASM to encode for 16 bit execution
-org 0x7C00        ; set up memory offset
+org 0x7C00        ; tell NASM to calculate addresses assuming an origin of 0x7C00
 
 xor ax, ax        ; xor ax with itself (0), put it into ax
 mov ds, ax        ; put 0 into ds (data segment)
@@ -9,11 +9,11 @@ mov ss, ax        ; put ax (0 here) into the stack segment
 mov sp, 0x7000    ; put 0x7000 into the stack pointer
 sti               ; set interrupt flag (allow hardware interrupts)
 
-mov si, message   ; put our message into the source index register
-mov al, [si]      ; move the byte at the [si] memory address into lower 8 bits of AX register
+mov si, message   ; put the address of message into the source index register (SI)
+mov al, [si]      ; read one byte from memory at DS:SI into AL
                   ; think "AX, LOWER"
 .loop:
-  cmp al, 0       ; compare 0 and what is currently in al
+  cmp al, 0       ; compare 0 and what is currently in al; set CPU flags based on AL - 0, without changing AL
   je .done        ; if they are equal, jump to .done (je = jump if equal); if not, continue
   call .print     ; call .print (saves location in stack for the ret call)
   call .next      ; call .next (saves location in stack for the ret call)
@@ -22,12 +22,12 @@ mov al, [si]      ; move the byte at the [si] memory address into lower 8 bits o
 .next:
   inc si          ; increment source index register by one (pointer math)
   mov al, [si]    ; move the current byte at the [si] memory address into the AL register
-  ret             ; return to called location
+  ret             ; pop saved return address from stack and resume there
 
 .print:
   mov ah, 0x0E    ; select BIOS TTY print function
   int 0x10        ; call BIOS video service to print contents of AL
-  ret             ; return to called location
+  ret             ; pop saved return address from stack and resume there
 
 .done:
   cli             ; clear Interrupt Flag (IF) in FLAGS
