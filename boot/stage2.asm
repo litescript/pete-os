@@ -1,6 +1,12 @@
 bits 16
 org 0x8000
 
+jmp second_sector
+
+times 512-($-$$) db 0
+
+second_sector:
+
 mov al, 'X'
 
 mov ah, 0x0E
@@ -11,4 +17,4 @@ cli
   hlt
   jmp .hang
 
-times 512-($-$$) db 0
+times 1024-($-$$) db 0

@@ -1,4 +1,7 @@
-.PHONY: run clean
+.DEFAULT_GOAL := all
+.PHONY: run clean all
+
+all: build/pete-os.img
 
 build:
 	mkdir -p build
