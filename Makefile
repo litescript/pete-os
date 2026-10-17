@@ -13,7 +13,8 @@ build/pete-os.img: build/stage1.bin build/stage2.bin | build
 	cat build/stage1.bin build/stage2.bin > build/pete-os.img
 
 run: build/pete-os.img
-	qemu-system-i386 -drive format=raw,file=build/pete-os.img,if=floppy
+	NO_AT_BRIDGE=1 GDK_BACKEND=x11 GDK_SCALE=2 \
+	qemu-system-i386 -display gtk -drive format=raw,file=build/pete-os.img,if=floppy
 
 clean:
 	rm -rf build
