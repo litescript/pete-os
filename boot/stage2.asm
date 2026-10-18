@@ -64,7 +64,7 @@ mov fs, ax                  ; remaining
 mov gs, ax                  ; registers
 
 ; Put 'P' as bright white on black into the VGA text buffer
-mov byte [0xB8000], 0x0F50  ; ASCII P character (50) as bright white on black (0F)
+mov word [0xB8000], 0x0F50  ; ASCII P character (50) as bright white on black (0F)
 
 cli
 
