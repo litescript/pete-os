@@ -7,10 +7,6 @@ times 512-($-$$) db 0         ; pad pad pad pad - read by nasm, not CPU
 
 second_sector:                ; duh
 
-mov al, 'X'                   ; duh
-mov ah, 0x0E                  ; our familiar instructions to
-int 0x10                      ; tell the BIOS to print AL contents
-
 lgdt [gdt_descriptor]         ; tells CPU to read six-byte structure at gdt_descriptor and load
                               ; its contents into the GDTR register
 
@@ -58,9 +54,23 @@ gdt_descriptor:
 bits 32                       ; encode for 32 bit!
 
 protected_mode_start:
-  cli
+
+mov ax, 0x10                ; our protected-mode data selector
+mov ds, ax                  ; load DS from our GDT
+mov ss, ax                  ; load our protected-mode data selector into SS
+mov esp, 0x7000             ; configure 32 bit stack pointer
+mov es, ax                  ; configure
+mov fs, ax                  ; remaining
+mov gs, ax                  ; registers
+
+; Put 'P' as bright white on black into the VGA text buffer
+mov byte [0xB8000], 'P'     ; ASCII P character
+mov byte [0xB8001], 0x0F    ; attribute; in this case, bright white on black
+
+cli
+
 .hang:
   hlt
-  jmp.hang
+  jmp .hang
 
 times 1024-($-$$) db 0        ; nasm instruction to pad rest of file size with 0 bytes
