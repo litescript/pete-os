@@ -16,7 +16,7 @@ mov es, ax        ; ES = 0, destination segment
 mov bx, 0x8000    ; BX = 0x8000, destination offset
 
 mov ah, 0x02      ; BIOS disk service: read sectors
-mov al, 2         ; request two sectos
+mov al, 2         ; request two sectors
 mov ch, 0         ; Cylinder 0
 mov dh, 0         ; Head 0
 mov cl, 2         ; Sector 2

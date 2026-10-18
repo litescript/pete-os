@@ -63,6 +63,13 @@ mov es, ax                    ; configure
 mov fs, ax                    ; remaining
 mov gs, ax                    ; registers
 
+; clear leftover firmware messages
+cld                           ; clear direction flag
+mov ax, 0x0F20                ; put the space and white/black character/attribute into AX
+mov edi, 0xB8000              ; EDI points to start of VGA text memory
+mov ecx, 2000                 ; 80 columns x 25 rows = 2000 cells
+rep stosw                     ; write AX to [EDI], advance EDI by 2, repeat ECX times
+
 mov esi, message32
 mov edi, 0xB8000
 
@@ -79,6 +86,16 @@ mov edi, 0xB8000
   jmp .print                  ; repeat the loop
 
 .done:
+
+mov dx, 0x3D4                 ; VGA controller index port
+mov al, 0x0A                  ; select cursor start register
+out dx, al                    ; send that selection to the hardware
+
+mov dx, 0x3D5                 ; VGA controller data port
+in al, dx                     ; read current value
+or al, 0x20                   ; set bit 5: disable cursor
+out dx, al                    ; write modified value back
+in al, dx
 
 cli
 
