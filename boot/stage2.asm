@@ -63,8 +63,6 @@ mov es, ax                    ; configure
 mov fs, ax                    ; remaining
 mov gs, ax                    ; registers
 
-mov edi, 0xB8000
-
 mov esi, message32
 mov edi, 0xB8000
 
