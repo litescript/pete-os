@@ -63,8 +63,19 @@ mov es, ax                  ; configure
 mov fs, ax                  ; remaining
 mov gs, ax                  ; registers
 
-; Put 'P' as bright white on black into the VGA text buffer
-mov word [0xB8000], 0x0F50  ; ASCII P character (50) as bright white on black (0F)
+mov edi, 0xB8000
+
+mov esi, message32
+mov edi, 0xB8000
+
+mov al, [esi]
+mov ah, 0x0F
+mov [edi], ax
+inc esi
+add edi, 2
+mov al, [esi]
+mov ah, 0x0F
+mov [edi], ax
 
 cli
 
@@ -72,4 +83,5 @@ cli
   hlt
   jmp .hang
 
+message32: db 'PETE OS', 0
 times 1024-($-$$) db 0        ; nasm instruction to pad rest of file size with 0 bytes
