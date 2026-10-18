@@ -55,27 +55,32 @@ bits 32                       ; encode for 32 bit!
 
 protected_mode_start:
 
-mov ax, 0x10                ; our protected-mode data selector
-mov ds, ax                  ; load DS from our GDT
-mov ss, ax                  ; load our protected-mode data selector into SS
-mov esp, 0x7000             ; configure 32 bit stack pointer
-mov es, ax                  ; configure
-mov fs, ax                  ; remaining
-mov gs, ax                  ; registers
+mov ax, 0x10                  ; our protected-mode data selector
+mov ds, ax                    ; load DS from our GDT
+mov ss, ax                    ; load our protected-mode data selector into SS
+mov esp, 0x7000               ; configure 32 bit stack pointer
+mov es, ax                    ; configure
+mov fs, ax                    ; remaining
+mov gs, ax                    ; registers
 
 mov edi, 0xB8000
 
 mov esi, message32
 mov edi, 0xB8000
 
-mov al, [esi]
-mov ah, 0x0F
-mov [edi], ax
-inc esi
-add edi, 2
-mov al, [esi]
-mov ah, 0x0F
-mov [edi], ax
+.print:                       ; printing loop
+  mov al, [esi]               ; load next character from [esi] into AL
+  cmp al, 0                   ; compare against 0
+  je .done                    ; if 0, jump to .done
+
+  mov ah, 0x0F                ; move our attribute byte into ah (bright white on black)
+  mov [edi], ax               ; copy contents of ax into [edi]
+
+  inc esi                     ; increment esi by one
+  add edi, 2                  ; increment edi by 2
+  jmp .print                  ; repeat the loop
+
+.done:
 
 cli
 
