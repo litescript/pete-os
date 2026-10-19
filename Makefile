@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-.PHONY: run clean all
+.PHONY: run clean all tar
 
 all: build/pete-os.img
 
@@ -34,3 +34,8 @@ run: build/pete-os.img
 
 clean:
 	rm -rf build
+
+tar:
+	tar --exclude='./.git' \
+			--exclude='./build' \
+			-cf ../pete-os.tar .
