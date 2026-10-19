@@ -24,7 +24,7 @@ mov dl, [boot_drive]  ; restore drive identifier into DL
 
 int 0x13              ; ask BIOS to read the sector
 jc .disk_error        ; jump if the read failed
-
+mov dl, [boot_drive]  ; restore boot drive for Stage 2
 jmp 0x0000:0x8000     ; far jump to start execution of stage 2
 
 mov si, message   ; put the address of message into the source index register (SI)

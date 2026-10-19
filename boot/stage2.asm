@@ -6,6 +6,21 @@ jmp second_sector             ; obvious
 times 512-($-$$) db 0         ; pad pad pad pad - read by nasm, not CPU
 
 second_sector:                ; duh
+mov [boot_drive], dl          ; save boot drive number here in stage 2
+
+mov ax, 0x1000                ; segment 0x1000
+mov es, ax                    ; destination segment
+xor bx, bx                    ; offset 0x0000
+
+mov ah, 0x02                  ; BIOS read sectors
+mov al, 1                     ; read one sector
+mov ch, 0                     ; cylinder 0
+mov cl, 4                     ; sector 4
+mov dh, 0                     ; head 0
+mov dl, [boot_drive]          ; restore BIOS boot drive
+
+int 0x13                      ; call BIOS disk read interrupt
+jc .disk_error                ; disk read error handler conditional jump
 
 lgdt [gdt_descriptor]         ; tells CPU to read six-byte structure at gdt_descriptor and load
                               ; its contents into the GDTR register
@@ -16,10 +31,11 @@ cli
 mov cr0, eax                  ; put our copy into cr0, enabling protected mode
 jmp 0x08:protected_mode_start ; far jump 
 
-cli                           ; clear interrupt flag and hang loop
-.hang:                        ;
-  hlt                         ;
-  jmp .hang                   ;
+.disk_error:                  ; where we go to handle disk read error
+  cli                         ; clear interrupt flag
+.error_hang:                  ; self-documenting
+  hlt                         ; see above
+  jmp .error_hang             ; you know the drill
 
 ;
 ; Global Descriptor Table
@@ -87,6 +103,7 @@ mov edi, 0xB8000
 
 .done:
 
+; selecting VGA and ports, disabling cursor
 mov dx, 0x3D4                 ; VGA controller index port
 mov al, 0x0A                  ; select cursor start register
 out dx, al                    ; send that selection to the hardware
@@ -97,11 +114,15 @@ or al, 0x20                   ; set bit 5: disable cursor
 out dx, al                    ; write modified value back
 in al, dx
 
+call 0x10000                  ; call our kernel, which is loaded at 0x10000, it returns on its own
+
+; finish gracefully
 cli
 
 .hang:
   hlt
   jmp .hang
 
-message32: db 'PETE OS', 0
+boot_drive: db 0              ; familiar boot drive number (initialization only)
+message32: db 'PETE OS', 0    ; our message, null terminated
 times 1024-($-$$) db 0        ; nasm instruction to pad rest of file size with 0 bytes
