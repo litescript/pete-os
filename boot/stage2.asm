@@ -38,8 +38,8 @@ pop ax                        ; restore AX=0x02 for BIOS
 
 push si                       ; push si to stack
 push di                       ; push di to stack
-push cx
-push dx
+push cx                       ; push cx to stack
+push dx                       ; push dx to stack
 
 int 0x13                      ; call BIOS disk read interrupt
 
