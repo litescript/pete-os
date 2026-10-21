@@ -1,4 +1,4 @@
-ENTRY(kernel_main)
+ENTRY(_kernel_start)
 
 SECTIONS
 {
@@ -6,5 +6,16 @@ SECTIONS
 
   .text : {
     *(.text)
+  }
+  .rodata : {
+    *(.rodata)
+  }
+  .data : {
+    *(.data)
+  }
+  .bss : {
+    __bss_start = .;
+    *(.bss)
+    __bss_end = .;
   }
 }
