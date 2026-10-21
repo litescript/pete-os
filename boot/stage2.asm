@@ -15,8 +15,8 @@ xor bx, bx                    ; offset 0x0000
 mov ah, 0x02                  ; BIOS read sectors
 mov al, KERNEL_SECTORS        ; read dynamic sector(s) set at compile
 mov ch, 0                     ; cylinder 0
-mov cl, 4                     ; sector 4
 mov dh, 0                     ; head 0
+mov cl, 4                     ; sector 4
 mov dl, [boot_drive]          ; restore BIOS boot drive
 
 int 0x13                      ; call BIOS disk read interrupt
