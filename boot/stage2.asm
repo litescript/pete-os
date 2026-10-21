@@ -12,16 +12,59 @@ mov ax, 0x1000                ; segment 0x1000
 mov es, ax                    ; destination segment
 xor bx, bx                    ; offset 0x0000
 
-mov ah, 0x02                  ; BIOS read sectors
-mov al, KERNEL_SECTORS        ; read dynamic sector(s) set at compile
+mov si, KERNEL_SECTORS        ; sectors remaining to load
 mov ch, 0                     ; cylinder 0
 mov dh, 0                     ; head 0
 mov cl, 4                     ; sector 4
 mov dl, [boot_drive]          ; restore BIOS boot drive
 
-int 0x13                      ; call BIOS disk read interrupt
-jc .disk_error                ; disk read error handler conditional jump
+read_sectors:
+mov ax, si                    ; copy remaining sector count into AX
+mov ah, 0x02                  ; BIOS disk-read function
 
+mov bl, 19                    ; 18 sectors per track, numbered 1-18
+sub bl, cl                    ; calculate sectors left on track
+cmp si, bx                    ; compare remaining kernel sectors to track space
+jbe sector_count_ready        ; if they fit, keep the count in AL
+mov ax, bx                    ; otherwise, use available track space
+mov ah, 0x02                  ; restore BIOS function
+
+sector_count_ready:
+xor bx, bx                    ; restore destination offset
+push ax                       ; preserve AH and AL
+xor ah, ah                    ; zero upper half of AX
+mov di, ax                    ; DI now contains only sector count
+pop ax                        ; restore AX=0x02 for BIOS
+
+push si                       ; push si to stack
+push di                       ; push di to stack
+push cx
+push dx
+
+int 0x13                      ; call BIOS disk read interrupt
+
+pop dx                        ; order matters! LIFO, so, dx first
+pop cx                        ; then cx
+pop di                        ; then di
+pop si                        ; then si
+
+jc disk_error                 ; disk read error handler conditional jump
+sub si, di                    ; subtract sectors read from sectors remaining
+mov ax, di                    ; stash our sector count in ax
+shl ax, 5                     ; shift ax left by 5, which is 2^5, or x32
+mov bx, es                    ; copy ES so we can advance the segment
+add bx, ax                    ; increment bx by ax amount
+mov es, bx                    ; put the new address back into es
+xor bx, bx                    ; put bx back to 0
+cmp si, 0                     ; did we finish reading?
+je kernel_loaded              ; if so, jump to start loading protected mode
+; more sectors remain, so advance disk position
+mov dh, 1
+mov cl, 1
+
+; jmp read_sectors              ; otherwise, go back and keep reading
+
+kernel_loaded:
 lgdt [gdt_descriptor]         ; tells CPU to read six-byte structure at gdt_descriptor and load
                               ; its contents into the GDTR register
 
@@ -31,7 +74,7 @@ cli
 mov cr0, eax                  ; put our copy into cr0, enabling protected mode
 jmp 0x08:protected_mode_start ; far jump 
 
-.disk_error:                  ; where we go to handle disk read error
+disk_error:                   ; where we go to handle disk read error
   cli                         ; clear interrupt flag
 .error_hang:                  ; self-documenting
   hlt                         ; see above
