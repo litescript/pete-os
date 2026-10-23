@@ -19,17 +19,19 @@ mov cl, 4                     ; sector 4
 mov dl, [boot_drive]          ; restore BIOS boot drive
 
 read_sectors:
-mov ax, si                    ; copy remaining sector count into AX
-mov ah, 0x02                  ; BIOS disk-read function
-
+xor bx, bx                    ; clear full BX before calculating track space
 mov bl, 19                    ; 18 sectors per track, numbered 1-18
 sub bl, cl                    ; calculate sectors left on track
 cmp si, bx                    ; compare remaining kernel sectors to track space
-jbe sector_count_ready        ; if they fit, keep the count in AL
+jbe use_remaining
 mov ax, bx                    ; otherwise, use available track space
-mov ah, 0x02                  ; restore BIOS function
+jmp sector_count_ready
+
+use_remaining:
+mov ax, si                    ; copy remaining sector count into AX
 
 sector_count_ready:
+mov ah, 0x02                  ; BIOS disk-read function
 xor bx, bx                    ; restore destination offset
 push ax                       ; preserve AH and AL
 xor ah, ah                    ; zero upper half of AX
@@ -59,10 +61,20 @@ xor bx, bx                    ; put bx back to 0
 cmp si, 0                     ; did we finish reading?
 je kernel_loaded              ; if so, jump to start loading protected mode
 ; more sectors remain, so advance disk position
-mov dh, 1
-mov cl, 1
+cmp dh, 0
+je next_head                  ; head 0? handle that case
 
-; jmp read_sectors              ; otherwise, go back and keep reading
+inc ch                        ; if we're here, head 1: advance cylinder
+mov dh, 0                     ; return to head 0
+jmp sector_reset              ; our work here is done. skip past the next branch
+
+next_head:
+mov dh, 1                     ; head 0: switch to head 1
+
+sector_reset:                 ; conditionals re-join here
+mov cl, 1                     ; both paths start at sector 1
+
+jmp read_sectors              ; if we're here, we need to go back and keep reading
 
 kernel_loaded:
 lgdt [gdt_descriptor]         ; tells CPU to read six-byte structure at gdt_descriptor and load

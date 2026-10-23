@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-.PHONY: run clean all tar
+.PHONY: run clean all tar test-loader
 
 all: build/pete-os.img
 
@@ -25,11 +25,40 @@ build/kernel.bin: build/kernel.elf | build
 	objcopy -O binary -j .text -j .rodata -j .data build/kernel.elf build/kernel.bin
 
 build/kernel-sector.bin: build/kernel.bin | build
+	@test "$$(wc -c < build/kernel.bin)" -le $$((512 * 1024)) || \
+		{ echo "ERROR: kernel exceeds provisional 512 KiB limit"; exit 1; }
 	cp build/kernel.bin build/kernel-sector.bin
 	truncate -s $$(( (($$(wc -c < build/kernel.bin) + 511 ) / 512) * 512 )) build/kernel-sector.bin
 
 build/pete-os.img: build/stage1.bin build/stage2.bin build/kernel-sector.bin | build
 	cat build/stage1.bin build/stage2.bin build/kernel-sector.bin > build/pete-os.img
+	truncate -s 1474560 build/pete-os.img
+
+build/main-test.o: kernel/main.c | build
+	gcc -m32 -ffreestanding -fno-pie -fno-pic -O2 -DLOADER_TEST -c kernel/main.c -o build/main-test.o
+
+build/kernel-test.elf: build/start.o build/main-test.o kernel/linker.ld | build
+	ld -m elf_i386 -T kernel/linker.ld -o build/kernel-test.elf build/start.o build/main-test.o
+
+build/kernel-test-raw.bin: build/kernel-test.elf | build
+	objcopy -O binary -j .text -j .rodata -j .data build/kernel-test.elf build/kernel-test-raw.bin
+
+build/stage2-test.bin: boot/stage2.asm build/kernel-test.bin | build
+	nasm -f bin -D KERNEL_SECTORS=34 boot/stage2.asm -o build/stage2-test.bin
+
+build/kernel-test.bin: build/kernel-test-raw.bin | build
+	cp build/kernel-test-raw.bin build/kernel-test.bin
+	printf '\xA5' | dd of=build/kernel-test.bin bs=1 seek=7680 conv=notrunc
+	printf '\x5A' | dd of=build/kernel-test.bin bs=1 seek=16896 conv=notrunc
+	truncate -s 17408 build/kernel-test.bin
+
+build/pete-os-test.img: build/stage1.bin build/stage2-test.bin build/kernel-test.bin | build
+	cat build/stage1.bin build/stage2-test.bin build/kernel-test.bin > build/pete-os-test.img
+	truncate -s 1474560 build/pete-os-test.img
+
+test-loader: build/pete-os-test.img
+	NO_AT_BRIDGE=1 GDK_BACKEND=x11 GDK_SCALE=2 \
+	qemu-system-i386 -display gtk -drive format=raw,file=build/pete-os-test.img,if=floppy
 
 run: build/pete-os.img
 	NO_AT_BRIDGE=1 GDK_BACKEND=x11 GDK_SCALE=2 \
