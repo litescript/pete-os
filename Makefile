@@ -12,14 +12,17 @@ build/stage1.bin : boot/stage1.asm | build
 build/stage2.bin: boot/stage2.asm build/kernel.bin | build
 	nasm -f bin -D KERNEL_SECTORS=$$(( ($$(wc -c < build/kernel.bin) + 511) / 512 )) boot/stage2.asm -o build/stage2.bin
 
-build/main.o: kernel/main.c | build
+build/vga.o: kernel/vga.c kernel/vga.h | build
+	gcc -m32 -ffreestanding -fno-pie -fno-pic -O2 -c kernel/vga.c -o build/vga.o
+
+build/main.o: kernel/main.c kernel/vga.h | build
 	gcc -m32 -ffreestanding -fno-pie -fno-pic -O2 -c kernel/main.c -o build/main.o
 
 build/start.o: kernel/start.asm | build
 	nasm -f elf32 kernel/start.asm -o build/start.o
 
-build/kernel.elf: build/start.o build/main.o kernel/linker.ld | build
-	ld -m elf_i386 -T kernel/linker.ld -o build/kernel.elf build/start.o build/main.o
+build/kernel.elf: build/start.o build/main.o build/vga.o kernel/linker.ld | build
+	ld -m elf_i386 -T kernel/linker.ld -o build/kernel.elf build/start.o build/main.o build/vga.o
 
 build/kernel.bin: build/kernel.elf | build
 	objcopy -O binary -j .text -j .rodata -j .data build/kernel.elf build/kernel.bin
@@ -34,11 +37,11 @@ build/pete-os.img: build/stage1.bin build/stage2.bin build/kernel-sector.bin | b
 	cat build/stage1.bin build/stage2.bin build/kernel-sector.bin > build/pete-os.img
 	truncate -s 1474560 build/pete-os.img
 
-build/main-test.o: kernel/main.c | build
+build/main-test.o: kernel/main.c kernel/vga.h | build
 	gcc -m32 -ffreestanding -fno-pie -fno-pic -O2 -DLOADER_TEST -c kernel/main.c -o build/main-test.o
 
-build/kernel-test.elf: build/start.o build/main-test.o kernel/linker.ld | build
-	ld -m elf_i386 -T kernel/linker.ld -o build/kernel-test.elf build/start.o build/main-test.o
+build/kernel-test.elf: build/start.o build/main-test.o build/vga.o  kernel/linker.ld | build
+	ld -m elf_i386 -T kernel/linker.ld -o build/kernel-test.elf build/start.o build/main-test.o build/vga.o
 
 build/kernel-test-raw.bin: build/kernel-test.elf | build
 	objcopy -O binary -j .text -j .rodata -j .data build/kernel-test.elf build/kernel-test-raw.bin
