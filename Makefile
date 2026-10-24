@@ -64,7 +64,7 @@ test-loader: build/pete-os-test.img
 	qemu-system-i386 -display gtk -drive format=raw,file=build/pete-os-test.img,if=floppy
 
 run: build/pete-os.img
-	NO_AT_BRIDGE=1 GDK_BACKEND=x11 GDK_SCALE=2 \
+	NO_AT_BRIDGE=1 GDK_BACKEND=x11 GDK_SCALE=1 \
 	qemu-system-i386 -display gtk -drive format=raw,file=build/pete-os.img,if=floppy
 
 clean:
