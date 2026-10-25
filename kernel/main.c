@@ -1,3 +1,4 @@
+#include "kprintf.h"
 #include "vga.h"
 
 void kernel_main(void) {
@@ -11,10 +12,8 @@ void kernel_main(void) {
     vga_putc('\n');
     vga_printdec(4294967295U);
     vga_putc('\n');
-    vga_puts("and now, we got integer numbers. transmat firing!");
-    vga_putc('\n');
-    vga_puts("now, we bank some hex!");
-    vga_putc('\n');
+    vga_puts("and now, we got integer numbers. transmat firing!\n");
+    vga_puts("now, we bank some hex!\n");
     vga_printhex(0);
     vga_putc('\n');
     vga_printhex(10);
@@ -26,6 +25,9 @@ void kernel_main(void) {
     vga_printhex(0xDEADBEEF);
     vga_putc('\n');
     vga_printhex(4294967295U);
+    vga_putc('\n');
+    vga_puts("and now, for something completely different, yet remarkably familiar, a number:\n");
+    kprintf("%u", 12345U);
     vga_putc('\n');
     vga_puts("that's all for now, brother!");
 
