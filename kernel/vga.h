@@ -2,9 +2,9 @@
 #define VGA_H
 
 #include <stdint.h>
-#define B_WHITE 0x0F
-#define VGA_WIDTH 80
-#define VGA_HEIGHT 25
+#define B_WHITE     0x0F
+#define VGA_WIDTH   80
+#define VGA_HEIGHT  25
 
 void vga_putc(char c, uint8_t color);
 void vga_puts(const char *str, uint8_t color);

@@ -1,8 +1,17 @@
 #include "vga.h"
 
 void kernel_main(void) {
-    vga_puts("we used to be a society\n", B_WHITE);
-    vga_puts("and now we have newlines, really long ones. ones that can just go, and go, and eventually it will wrap to the next line.", B_WHITE);
+    for (int i = 0; i < 30; i++) {
+        if (i == 0) {
+            vga_puts("BEGIN!\n", B_WHITE);
+        }
+        vga_puts("we used to be a society\n", B_WHITE);
+        vga_putc((30 + i), B_WHITE);
+        vga_puts("\n", B_WHITE);
+        if (i == 29) {
+            vga_puts("END!", B_WHITE);
+        }
+    }
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;
