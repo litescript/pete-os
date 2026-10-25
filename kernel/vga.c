@@ -48,3 +48,23 @@ void vga_puts(const char *str) {
     }
 }
 
+void vga_printdec(uint32_t number) {
+    int i = 0;
+    char digits[10];
+
+    if (number == 0) {
+        vga_putc('0');
+        return;
+    }
+
+    while (number > 0) {
+        digits[i] = '0' + (number % 10);
+        i++;
+        number /= 10;
+    }
+
+    while (i > 0) {
+        i--;
+        vga_putc(digits[i]);
+    }
+}

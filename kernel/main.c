@@ -5,6 +5,13 @@ void kernel_main(void) {
     vga_puts("PETE OS\n\n");
     vga_puts("we used to be a society\n");
     vga_puts("and now, we scroll, brother\n");
+    vga_printdec(0);
+    vga_putc('\n');
+    vga_printdec(1203);
+    vga_putc('\n');
+    vga_printdec(4294967295U);
+    vga_putc('\n');
+    vga_puts("and now, we got integer numbers. transmat firing!");
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;
