@@ -12,6 +12,22 @@ void kernel_main(void) {
     vga_printdec(4294967295U);
     vga_putc('\n');
     vga_puts("and now, we got integer numbers. transmat firing!");
+    vga_putc('\n');
+    vga_puts("now, we bank some hex!");
+    vga_putc('\n');
+    vga_printhex(0);
+    vga_putc('\n');
+    vga_printhex(10);
+    vga_putc('\n');
+    vga_printhex(255);
+    vga_putc('\n');
+    vga_printhex(4096);
+    vga_putc('\n');
+    vga_printhex(0xDEADBEEF);
+    vga_putc('\n');
+    vga_printhex(4294967295U);
+    vga_putc('\n');
+    vga_puts("that's all for now, brother!");
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;

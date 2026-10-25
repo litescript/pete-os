@@ -68,3 +68,32 @@ void vga_printdec(uint32_t number) {
         vga_putc(digits[i]);
     }
 }
+
+void vga_printhex(uint32_t number) {
+    int i = 0;
+    char digits[8];
+
+    if (number == 0) {
+        vga_putc('0');
+        return;
+    }
+
+    while (number > 0) {
+        uint32_t digit = number % 16;
+
+        if (digit < 10) {
+            digits[i] = '0' + digit;
+        } else {
+            digits[i] = 'A' + (digit - 10);
+        }
+
+        i++;
+        number /= 16;
+    }
+
+    while (i > 0) {
+        i--;
+        vga_putc(digits[i]);
+    }
+}
+
