@@ -6,7 +6,8 @@
 #define VGA_WIDTH   80
 #define VGA_HEIGHT  25
 
-void vga_putc(char c, uint8_t color);
-void vga_puts(const char *str, uint8_t color);
+void vga_putc(char c);
+void vga_puts(const char *str);
+void vga_set_color(uint8_t color);
 
 #endif
