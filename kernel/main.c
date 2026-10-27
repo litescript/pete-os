@@ -29,7 +29,9 @@ void kernel_main(void) {
     vga_puts("and now, for something completely different, yet remarkably familiar, a number:\n");
     kprintf("%u", 12345U);
     vga_putc('\n');
-    vga_puts("that's all for now, brother!");
+    vga_puts("that's all for now, brother!\n");
+    vga_puts("now, here's kprintf to do some stuff for us:\n");
+    kprintf("Loaded %u sectors at 0x%x\n", 34U, 0x10000U);
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;
