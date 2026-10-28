@@ -3,35 +3,14 @@
 
 void kernel_main(void) {
     vga_set_color(B_WHITE);
-    vga_puts("PETE OS\n\n");
-    vga_puts("we used to be a society\n");
-    vga_puts("and now, we scroll, brother\n");
-    vga_printdec(0);
-    vga_putc('\n');
-    vga_printdec(1203);
-    vga_putc('\n');
-    vga_printdec(4294967295U);
-    vga_putc('\n');
-    vga_puts("and now, we got integer numbers. transmat firing!\n");
-    vga_puts("now, we bank some hex!\n");
-    vga_printhex(0);
-    vga_putc('\n');
-    vga_printhex(10);
-    vga_putc('\n');
-    vga_printhex(255);
-    vga_putc('\n');
-    vga_printhex(4096);
-    vga_putc('\n');
-    vga_printhex(0xDEADBEEF);
-    vga_putc('\n');
-    vga_printhex(4294967295U);
-    vga_putc('\n');
-    vga_puts("and now, for something completely different, yet remarkably familiar, a number:\n");
-    kprintf("%u", 12345U);
-    vga_putc('\n');
-    vga_puts("that's all for now, brother!\n");
-    vga_puts("now, here's kprintf to do some stuff for us:\n");
-    kprintf("Loaded %u sectors at 0x%x\n", 34U, 0x10000U);
+    kprintf("PETE OS\n\n");
+    kprintf("we used to be a society\n");
+    kprintf("and now, we have kprintf!\n");
+
+    kprintf("Decimal: %u\n", 1203U);
+    kprintf("Hex: 0x%x\n", 0xDEADBEEFU);
+    kprintf("Character: %c\n", 'A');
+    kprintf("String: %s\n", "TRANSMAT FIRING!");
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;
