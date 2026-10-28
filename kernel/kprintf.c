@@ -58,6 +58,7 @@ void kprintf(const char *format, ...) {
 
     while (format[i] != '\0') {
         if (format[i] == '%') {
+            // this is a big if block. TODO: switch?
             if (format[i + 1] == 'u') {
                 unsigned int number = va_arg(args, unsigned int);
                 printdec(number);
