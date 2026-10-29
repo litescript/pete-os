@@ -1,6 +1,7 @@
 #include "interrupts.h"
-extern void isr_breakpoint(void);
+#include "kprintf.h"
 
+extern void isr_breakpoint(void);
 static struct idt_entry idt[256];
 
 static void idt_set_entry(uint8_t vector, uint32_t handler) {
@@ -19,5 +20,9 @@ void idt_init(void) {
     idt_set_entry(3, (uint32_t)isr_breakpoint);
 
     __asm__ volatile ("lidt %0" : : "m"(descriptor) : "memory");
+}
+
+void breakpoint_handler(void) {
+    kprintf("BREAKPOINT CAUGHT!\n");
 }
 
