@@ -16,5 +16,6 @@ struct __attribute__((packed)) idt_entry {
     uint16_t offset_high;
 };
 
+void idt_init(void);
 
 #endif

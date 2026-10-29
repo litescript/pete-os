@@ -1,5 +1,6 @@
 #include "kprintf.h"
 #include "vga.h"
+#include "interrupts.h"
 
 void kernel_main(void) {
     vga_set_color(B_WHITE);
@@ -11,6 +12,13 @@ void kernel_main(void) {
     kprintf("Hex: 0x%x\n", 0xDEADBEEFU);
     kprintf("Character: %c\n", 'A');
     kprintf("String: %s\n", "TRANSMAT FIRING!");
+
+    kprintf("Initializing IDT...\n");
+    idt_init();
+    kprintf("IDT Loaded!\n");
+    kprintf("Triggering breakpoint...\n");
+    __asm__ volatile ("int3");
+    kprintf("Returned from breakpoint!\n");
 
     #ifdef LOADER_TEST
     volatile uint8_t *test = (volatile uint8_t *)0x11E00;
